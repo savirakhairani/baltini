@@ -52,3 +52,16 @@ Update the database connection details in the connect_baltini() function:
 }
 ```
 
+## Assumption 
+1. Product Duplicate Detection:
+- The product `title` in the `product_duplicates` table is assumed to be a concatenation of the product ID, gender, and category from product tags. This concatenated value serves as the key to identify similar products.
+- The logic assumes that duplicates arise when there are multiple products with the same concatenated key (product ID, gender, category).
+2. Partition Strategy
+/n For large datasets, partitioning can be helpful in improving query performance. In this case:
+- Monthly partitioning is recommended since total daily data is around 350k then it's best to improve query performance by monthly.
+3. Indexing Strategy:
+- Functional indexing on the concatenated expression (e.g., `CONCAT(SUBSTRING_INDEX(SUBSTRING_INDEX(tags, 'ProductID: ', -1), ',', 1), '-', LOWER(gender), '-', LOWER(category)))` is assumed to speed up queries that involve this expression.
+- The `CONCAT` function uses `SUBSTRING_INDEX` and `LOWER` functions, so creating an index directly on this expression can optimize query performance during lookups, filtering, and joining.
+- Indexing key columns such as `created_at`, `updated_at`, and `product_id` in the `products` table is also assumed to improve query speed.
+
+These assumptions are based on the given problem statement and are considered optimal for managing product duplicates, partitioning the database, and improving query performance.
